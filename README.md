@@ -1,122 +1,156 @@
-# 📘 Blind Person Helper System (ESP32 Based)
-
-![Project Status](https://img.shields.io/badge/Status-Complete-success)
-![Platform](https://img.shields.io/badge/Platform-ESP32-blue)
-![Language](https://img.shields.io/badge/Language-C%2B%2B-orange)
-
-## 🧠 1. Introduction
-
-The **Blind Person Helper System** is an assistive technology project designed to help visually impaired individuals navigate safely. This system uses ultrasonic sensors to detect obstacles in three directions (front, left, right) and provides feedback using vibration motors.
-
-Additionally, an **SOS emergency feature** is integrated using a touch sensor and Twilio API, allowing the user to send an emergency message to a predefined contact.
+<div align="center">
+  <img src="banner.png" alt="Blind Person Helper System Banner" width="100%">
+  
+  # 📘 Blind Person Helper System (ESP32 Based)
+  
+  **An IoT-enabled assistive technology device for visually impaired individuals, featuring real-time obstacle detection and emergency SOS alerts.**
+  
+  [![Project Status](https://img.shields.io/badge/Status-Complete-success)](#)
+  [![Platform](https://img.shields.io/badge/Platform-ESP32-blue)](#)
+  [![Language](https://img.shields.io/badge/Language-C%2B%2B-orange)](#)
+  [![License](https://img.shields.io/badge/License-MIT-green)](#)
+</div>
 
 ---
 
-## 🎯 2. Objective
+## 🧠 1. Introduction
 
-* **Detect obstacles** in real-time
-* **Provide directional feedback** using vibration
-* **Enable emergency communication** using SOS button
-* Build a low-cost and wearable assistive device
+The **Blind Person Helper System** is a low-cost, wearable assistive technology project (often implemented as smart glasses or a smart walking stick) designed to help visually impaired individuals navigate their surroundings safely. 
+
+This system leverages **ultrasonic sensors** to detect obstacles in three primary directions (front, left, right) and provides intuitive, directional haptic feedback using **vibration motors**. 
+
+Furthermore, to ensure user safety in critical situations, an **SOS emergency feature** is integrated using a touch sensor and the **Twilio API**. In case of an emergency, the user can press the touch sensor to instantly send an SMS alert to a predefined emergency contact via WiFi.
+
+---
+
+## 🎯 2. Project Objectives
+
+- 🛑 **Real-Time Obstacle Detection:** Identify objects within a critical range (e.g., 5 cm).
+- 📳 **Directional Haptic Feedback:** Provide specific vibration alerts based on the obstacle's location.
+- 📡 **Emergency Communication:** Allow the user to send a fast SOS SMS over WiFi.
+- 💡 **Accessibility & Affordability:** Create a low-cost, lightweight, and wearable solution.
 
 ---
 
 ## ⚙️ 3. Components Required
 
-### 🔌 Main Components
-* ESP32 Development Board
-* 3 × Ultrasonic Sensors (HC-SR04)
-* 2 × Coin Vibration Motors
-* 1 × Touch Sensor (TTP223)
+### 🔌 Main Hardware
+| Component | Quantity | Description |
+| :--- | :---: | :--- |
+| **ESP32 Development Board** | 1 | The main microcontroller with built-in WiFi. |
+| **HC-SR04 Ultrasonic Sensors** | 3 | Used for measuring distance via sound waves. |
+| **Coin Vibration Motors** | 2 | Provides haptic feedback (Left & Right). |
+| **TTP223 Touch Sensor** | 1 | Acts as the SOS button trigger. |
 
-### ⚙️ Supporting Components
-* 2 × BC547 Transistors
-* 5 × 1kΩ Resistors
-* 3 × 2kΩ Resistors
-* Jumper wires
-* Breadboard
-
-### 🔋 Power Supply
-* USB cable OR 5V battery / power bank
+### 🛠 Supporting Electronics
+- **2 × BC547 Transistors** (For motor switching)
+- **5 × 1kΩ Resistors** (Base resistors and voltage dividers)
+- **3 × 2kΩ Resistors** (Voltage dividers for sensor echoes)
+- **Jumper wires & Breadboard**
+- **5V Power Bank / USB Cable**
 
 ---
 
 ## 🔧 4. Working Principle
 
-* Ultrasonic sensors measure distance using sound waves.
-* If an obstacle is detected within **5 cm**:
-  * **Front** → both motors vibrate
-  * **Left** → left motor vibrates
-  * **Right** → right motor vibrates
-* **SOS button**:
-  * When pressed → ESP32 connects to WiFi
-  * Sends SMS using Twilio API
+1. **Environmental Scanning:** The three ultrasonic sensors continuously measure the distance to nearby objects using sound wave reflections.
+2. **Obstacle Detection Logic:** 
+   - If an obstacle is detected within the **5 cm threshold**:
+     - **Front Sensor Triggered:** Both left and right motors vibrate.
+     - **Left Sensor Triggered:** Only the left motor vibrates.
+     - **Right Sensor Triggered:** Only the right motor vibrates.
+3. **Emergency SOS Logic:**
+   - When the user presses the **TTP223 Touch Sensor**, the ESP32 connects to the specified WiFi network.
+   - It sends an HTTP POST request to the **Twilio API**, triggering an emergency SMS to a saved contact number.
 
 ---
 
-## 🔌 5. Pin Configuration
+## 🔌 5. Pin Configuration & Wiring
 
-| Component   | GPIO Pin |
-| ----------- | -------- |
-| Front TRIG  | 18       |
-| Front ECHO  | 19       |
-| Left TRIG   | 21       |
-| Left ECHO   | 22       |
-| Right TRIG  | 23       |
-| Right ECHO  | 27       |
-| Left Motor  | 25       |
-| Right Motor | 26       |
-| SOS Button  | 14       |
+| Component / Function | ESP32 GPIO Pin |
+| :--- | :---: |
+| Front Sensor (TRIG) | `18` |
+| Front Sensor (ECHO) | `19` |
+| Left Sensor (TRIG) | `21` |
+| Left Sensor (ECHO) | `22` |
+| Right Sensor (TRIG) | `23` |
+| Right Sensor (ECHO) | `27` |
+| Left Motor | `25` |
+| Right Motor | `26` |
+| SOS Button (Touch) | `14` |
 
----
+> ⚠️ **IMPORTANT SAFETY NOTE (Voltage Divider):**  
+> The HC-SR04 Echo pin outputs a **5V** logic signal, but the ESP32 GPIO pins are strictly **3.3V tolerant**. To prevent damage to the ESP32, you **MUST** use a voltage divider for every ECHO pin:
+> * ECHO pin → **1kΩ Resistor** → ESP32 GPIO
+> * ESP32 GPIO → **2kΩ Resistor** → GND
 
-## ⚠️ 6. Important Safety (Voltage Divider)
-
-The Echo pin gives 5V, but the ESP32 accepts 3.3V only. 
-
-**Use a voltage divider:**
-* ECHO → 1kΩ → ESP32
-* ESP32 → 2kΩ → GND
-
----
-
-## 🔌 7. Motor Connection (Using Transistor)
-
-For each motor:
-* Motor (+) → 3.3V
-* Motor (–) → Collector
-* Emitter → GND
-* Base → GPIO via 1k resistor
+> 🔌 **Motor Connection (Using Transistors):**
+> ESP32 GPIOs cannot supply enough current to drive motors directly. Use the BC547 transistor for switching:
+> * Motor (+) → **3.3V**
+> * Motor (–) → **Collector**
+> * Emitter → **GND**
+> * Base → **GPIO Pin** (via 1kΩ Resistor)
 
 ---
 
-## 🧪 8. Testing Procedure
+## 💻 6. Software Setup
 
-1. Power ON ESP32
-2. Open Serial Monitor (115200 baud)
-3. Move object near sensors
-4. Check vibration response
-5. Press SOS button → check SMS
+### Prerequisites
+1. Install [Arduino IDE](https://www.arduino.cc/en/software).
+2. Install the ESP32 Board Manager in Arduino IDE.
+3. Create a free account on [Twilio](https://www.twilio.com/) and obtain your `Account SID`, `Auth Token`, and a Twilio virtual phone number.
+
+### Configuration
+1. Open `blind_helper.c++` in your IDE.
+2. Update your WiFi credentials:
+   ```cpp
+   const char* ssid = "YOUR_WIFI_SSID";
+   const char* password = "YOUR_WIFI_PASSWORD";
+   ```
+3. Update your Twilio API credentials:
+   ```cpp
+   String account_sid = "YOUR_TWILIO_SID";
+   String auth_token  = "YOUR_TWILIO_TOKEN";
+   String from_number = "+1XXXXXXXXXX"; // Your Twilio Number
+   String to_number   = "+91XXXXXXXXXX"; // Emergency Contact Number
+   ```
+4. Compile and upload the code to your ESP32.
+
+> **Note:** A simplified version without the SOS/WiFi feature is also provided in `blind_helper_basic.c++`.
 
 ---
 
-## 🚀 9. Applications
+## 🧪 7. Testing Procedure
 
-* Assistive device for blind people
-* Smart walking stick
-* Indoor navigation aid
-
----
-
-## 🔮 10. Future Enhancements
-
-* GPS location sharing
-* Voice feedback system
-* Mobile app integration
-* AI-based object detection
+1. **Power ON** the ESP32 using a USB cable or a 5V power bank.
+2. Open the **Serial Monitor** at `115200` baud rate to view distance readings.
+3. Move your hand or an object near the sensors (within 5 cm).
+4. Verify that the correct vibration motors activate (Left, Right, or Both).
+5. Tap the touch sensor (SOS button). Wait a few seconds and check the predefined phone number for the emergency SMS.
 
 ---
 
-## 🏁 11. Conclusion
+## 🚀 8. Applications & Use Cases
 
-This project demonstrates how embedded systems and IoT can be used to create meaningful solutions for real-world problems. It enhances safety, independence, and accessibility for visually impaired individuals.
+* **Wearable Assistive Device:** Integrated into smart glasses for head-level obstacle detection.
+* **Smart Walking Stick:** Mounted on a cane for ground-level detection.
+* **Indoor Navigation Aid:** Helping visually impaired individuals navigate unfamiliar enclosed spaces safely.
+
+---
+
+## 🔮 9. Future Enhancements
+
+* 📍 **GPS Integration:** Send exact live coordinates in the SOS message.
+* 🗣️ **Voice Feedback:** Replace vibration with audio cues (e.g., "Obstacle on left") using a DFPlayer Mini.
+* 📱 **Mobile App Companion:** A dedicated app for configuring emergency contacts and viewing battery life.
+* 🧠 **AI-based Object Recognition:** Adding an ESP32-CAM to identify the *type* of obstacle (e.g., "Car", "Person", "Stairs").
+
+---
+
+## 🏁 10. Conclusion
+
+This project demonstrates the power of embedded systems and IoT in creating meaningful, life-enhancing solutions. By leveraging simple sensors and APIs, it significantly enhances the safety, independence, and accessibility of visually impaired individuals.
+
+<div align="center">
+  <b>Built with ❤️ for a more accessible world.</b>
+</div>
